@@ -6,7 +6,7 @@ const withPWA = withPWAInit({
 	cacheOnFrontEndNav: true,
 	aggressiveFrontEndNavCaching: true,
 	reloadOnOnline: true,
-	disable: process.env.NODE_ENV === "development", // Matikan di dev agar tidak caching agresif
+	disable: process.env.NODE_ENV === "development",
 	workboxOptions: {
 		disableDevLogs: true,
 	},
@@ -17,7 +17,7 @@ const nextConfig: NextConfig = {
 		remotePatterns: [
 			{
 				protocol: "https",
-				hostname: "**", // Mengizinkan semua domain gambar (Pragmatis untuk development)
+				hostname: "images.unsplash.com",
 			},
 		],
 	},

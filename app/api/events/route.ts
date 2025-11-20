@@ -1,25 +1,60 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { Prisma } from "@prisma/client"; // [1] Import tipe Prisma
+import { EventSchema, PaginationSchema } from "@/lib/validations";
+import { z } from "zod";
 
 export async function GET(request: NextRequest) {
-	const searchParams = request.nextUrl.searchParams;
-	const query = searchParams.get("q") || "";
+	const searchParams = Object.fromEntries(
+		request.nextUrl.searchParams.entries()
+	);
 
 	try {
+		const { page, limit, q, ids } = PaginationSchema.parse(searchParams);
+
+		// Skenario A: Bulk Fetching
+		if (ids && ids.length > 0) {
+			const events = await prisma.event.findMany({
+				where: {
+					id: { in: ids },
+				},
+				include: {
+					category: true,
+				},
+				orderBy: { date: "asc" },
+			});
+			return NextResponse.json(events);
+		}
+
+		// Skenario B: Pagination & Search
+		// [2] Ganti 'any' dengan tipe spesifik dari Prisma
+		const whereClause: Prisma.EventWhereInput = {};
+
+		if (q) {
+			whereClause.OR = [
+				// mode: 'insensitive' didukung oleh PostgreSQL
+				{ title: { contains: q, mode: "insensitive" } },
+				{ description: { contains: q, mode: "insensitive" } },
+			];
+		}
+
 		const events = await prisma.event.findMany({
-			where: {
-				OR: [
-					{ title: { contains: query, mode: "insensitive" } },
-					{ description: { contains: query, mode: "insensitive" } },
-				],
-			},
+			where: whereClause,
 			include: {
-				category: true, // Sertakan nama kategori untuk UI card
+				category: true,
 			},
 			orderBy: { date: "asc" },
+			skip: (page - 1) * limit,
+			take: limit,
 		});
+
 		return NextResponse.json(events);
 	} catch (error) {
+		if (error instanceof z.ZodError) {
+			return NextResponse.json({ error: error.flatten() }, { status: 400 });
+		}
+
+		console.error("API Error:", error);
 		return NextResponse.json(
 			{ error: "Internal Server Error" },
 			{ status: 500 }
@@ -30,23 +65,37 @@ export async function GET(request: NextRequest) {
 export async function POST(request: Request) {
 	try {
 		const body = await request.json();
-		// Pastikan validasi data di sini sebelum masuk DB (misal pakai Zod)
+
+		const validationResult = EventSchema.safeParse(body);
+
+		if (!validationResult.success) {
+			return NextResponse.json(
+				{
+					error: "Validation Error",
+					details: validationResult.error.flatten().fieldErrors,
+				},
+				{ status: 400 }
+			);
+		}
+
+		const { data } = validationResult;
 
 		const event = await prisma.event.create({
 			data: {
-				title: body.title,
-				description: body.description,
-				date: new Date(body.date),
-				location: body.location,
-				imageUrl: body.imageUrl,
-				categoryId: body.categoryId,
-				organizerId: body.organizerId,
-				isFeatured: body.isFeatured || false,
+				title: data.title,
+				description: data.description,
+				date: new Date(data.date),
+				location: data.location,
+				imageUrl: data.imageUrl || null,
+				categoryId: data.categoryId,
+				organizerId: data.organizerId,
+				isFeatured: data.isFeatured,
 			},
 		});
+
 		return NextResponse.json(event, { status: 201 });
 	} catch (error) {
-		console.error(error);
+		console.error("Create Event Error:", error);
 		return NextResponse.json(
 			{ error: "Failed to create event" },
 			{ status: 500 }

@@ -2,74 +2,132 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { HeartOff } from "lucide-react";
+import { HeartOff, RefreshCw } from "lucide-react";
 import EventCard from "@/components/EventCard";
-import { Event } from "@/types";
+import { Event, FavoriteSnapshot } from "@/types";
 
 export default function FavoritesPage() {
-	const [events, setEvents] = useState<Event[]>([]);
-	const [loading, setLoading] = useState(true);
+	// State menyimpan gabungan antara snapshot offline atau data live dari server
+	const [favorites, setFavorites] = useState<FavoriteSnapshot[]>([]);
+	const [isMounted, setIsMounted] = useState(false);
+	const [isSyncing, setIsSyncing] = useState(false);
 
 	useEffect(() => {
-		async function fetchFavorites() {
+		setIsMounted(true);
+
+		// 1. INSTANT LOAD: Baca langsung dari LocalStorage
+		// User tidak melihat loading spinner, tapi langsung melihat konten terakhir
+		const loadLocalFavorites = () => {
 			try {
-				// 1. Ambil ID dari LocalStorage
-				const storedIds = JSON.parse(localStorage.getItem("favorites") || "[]");
-
-				if (storedIds.length === 0) {
-					setLoading(false);
-					return;
+				const stored = localStorage.getItem("favorites");
+				if (stored) {
+					const parsed: FavoriteSnapshot[] = JSON.parse(stored);
+					setFavorites(parsed);
+					return parsed;
 				}
-
-				// 2. Fetch detail event dari API (Client-side Fetching)
-				// Kita gunakan Promise.all untuk fetch paralel
-				const promises = storedIds.map((id: string) =>
-					fetch(`/api/events/${id}`).then((res) => {
-						if (res.ok) return res.json();
-						return null;
-					})
-				);
-
-				const results = await Promise.all(promises);
-				// Filter yang null (jika event sudah dihapus admin tapi masih ada di storage user)
-				setEvents(results.filter((e) => e !== null));
-			} catch (error) {
-				console.error("Failed to load favorites", error);
-			} finally {
-				setLoading(false);
+			} catch (e) {
+				console.error("Cache Error:", e);
 			}
-		}
+			return [];
+		};
 
-		fetchFavorites();
+		const localData = loadLocalFavorites();
+
+		// 2. BACKGROUND SYNC: Revalidasi data jika Online
+		if (localData.length > 0 && navigator.onLine) {
+			const revalidateData = async () => {
+				try {
+					setIsSyncing(true);
+					// Ambil semua ID untuk bulk fetch
+					const ids = localData.map((f) => f.id).join(",");
+
+					// Tembak endpoint bulk yang baru kita buat
+					const res = await fetch(`/api/events?ids=${ids}`);
+
+					if (res.ok) {
+						const serverData: Event[] = await res.json();
+
+						// A. Update UI dengan data segar (misal: judul berubah)
+						// Kita casting ke unknown dulu agar kompatibel dengan tipe state
+						setFavorites(serverData as unknown as FavoriteSnapshot[]);
+
+						// B. Perbarui Cache LocalStorage agar offline session berikutnya dapat data baru
+						const freshSnapshots: FavoriteSnapshot[] = serverData.map(
+							(evt) => ({
+								id: evt.id,
+								title: evt.title,
+								date: evt.date,
+								location: evt.location,
+								imageUrl: evt.imageUrl,
+								category: evt.category
+									? { name: evt.category.name, icon: evt.category.icon }
+									: undefined,
+							})
+						);
+						localStorage.setItem("favorites", JSON.stringify(freshSnapshots));
+					}
+				} catch (error) {
+					console.warn("Sync gagal, tetap menggunakan data offline." + error);
+				} finally {
+					setIsSyncing(false);
+				}
+			};
+
+			revalidateData();
+		}
 	}, []);
+
+	// Mencegah Hydration Error karena akses localStorage
+	if (!isMounted) {
+		return <div className="min-h-screen bg-gray-50" />;
+	}
 
 	return (
 		<div className="pb-24 min-h-screen bg-gray-50">
-			<div className="bg-white px-4 py-3 border-b border-gray-200 sticky top-0 z-30">
-				<h1 className="text-xl font-bold text-gray-800">Favorit Saya</h1>
+			{/* Header dengan Indikator Sync Halus */}
+			<div className="bg-white/80 backdrop-blur-md px-6 py-4 border-b border-gray-200 sticky top-0 z-30 flex justify-between items-center transition-all">
+				<h1 className="text-xl font-bold text-gray-900 tracking-tight">
+					Favorit Saya
+				</h1>
+
+				{/* Indikator visual saat sedang mengambil data baru */}
+				<div
+					className={`flex items-center gap-2 text-xs font-medium text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full transition-opacity duration-500 ${
+						isSyncing ? "opacity-100" : "opacity-0"
+					}`}
+				>
+					<RefreshCw size={12} className="animate-spin" />
+					<span>Memperbarui...</span>
+				</div>
 			</div>
 
-			<div className="p-4 space-y-4">
-				{loading ? (
-					// Skeleton Loading Sederhana
-					[1, 2, 3].map((i) => (
-						<div
-							key={i}
-							className="h-28 bg-gray-200 rounded-xl animate-pulse"
-						/>
-					))
-				) : events.length > 0 ? (
-					events.map((event) => <EventCard key={event.id} event={event} />)
+			<div className="p-4 md:p-6 max-w-7xl mx-auto">
+				{favorites.length > 0 ? (
+					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+						{favorites.map((fav) => (
+							// EventCard menerima prop Event, FavoriteSnapshot adalah subset-nya.
+							// Secara runtime ini aman karena EventCard hanya render field yang ada di Snapshot.
+							<EventCard key={fav.id} event={fav as unknown as Event} />
+						))}
+					</div>
 				) : (
-					<div className="flex flex-col items-center justify-center py-20 text-center text-gray-400">
-						<HeartOff size={48} className="mb-4 opacity-50" />
-						<p className="text-lg font-medium">Belum ada favorit</p>
-						<p className="text-sm mb-6">Simpan event yang kamu suka di sini.</p>
+					// Tampilan Empty State yang lebih estetik
+					<div className="flex flex-col items-center justify-center py-32 text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
+						<div className="bg-white p-6 rounded-full shadow-sm mb-6 ring-1 ring-gray-100">
+							<HeartOff size={48} className="text-gray-300" />
+						</div>
+						<h3 className="text-xl font-bold text-gray-900 mb-2">
+							Belum ada favorit
+						</h3>
+						<p className="text-gray-500 max-w-xs mx-auto mb-8 leading-relaxed text-sm">
+							Simpan event yang kamu minati agar bisa diakses kapan saja, bahkan
+							tanpa internet.
+						</p>
 						<Link
 							href="/"
-							className="px-6 py-2 bg-blue-600 text-white rounded-full text-sm font-bold"
+							className="px-8 py-3.5 bg-blue-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-200 hover:shadow-xl hover:bg-blue-700 hover:-translate-y-1 transition-all duration-300"
 						>
-							Cari Event
+							Jelajahi Event
 						</Link>
 					</div>
 				)}

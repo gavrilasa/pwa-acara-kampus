@@ -24,6 +24,7 @@ export default async function EventDetailPage({
 
 	if (!event) return notFound();
 
+	// Format tanggal untuk tampilan UI
 	const eventDate = new Date(event.date).toLocaleDateString("id-ID", {
 		weekday: "long",
 		day: "numeric",
@@ -46,7 +47,8 @@ export default async function EventDetailPage({
 					<ArrowLeft size={24} />
 				</Link>
 				<div className="pointer-events-auto">
-					<FavoriteButton eventId={event.id} />
+					{/* [FIX] Pass full event object instead of just ID */}
+					<FavoriteButton event={event} />
 				</div>
 			</div>
 
@@ -66,7 +68,7 @@ export default async function EventDetailPage({
 							No Image
 						</div>
 					)}
-					<div className="md:hidden absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
+					<div className="md:hidden absolute inset-0 bg-linear-to-t from-black/10 to-transparent" />
 				</div>
 
 				{/* --- RIGHT COLUMN (CONTENT) --- */}
@@ -79,7 +81,8 @@ export default async function EventDetailPage({
 						>
 							<ArrowLeft size={20} /> Kembali
 						</Link>
-						<FavoriteButton eventId={event.id} />
+						{/* [FIX] Pass full event object here too */}
+						<FavoriteButton event={event} />
 					</div>
 
 					{/* Badge */}
@@ -143,21 +146,7 @@ export default async function EventDetailPage({
 							{event.description}
 						</p>
 					</div>
-
-					{/* Button Desktop (Inline) */}
-					<div className="hidden md:block mt-8">
-						<button className="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-blue-700 transition-all">
-							Daftar Sekarang
-						</button>
-					</div>
 				</div>
-			</div>
-
-			{/* Mobile Floating Button */}
-			<div className="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-gray-100 p-4 pb-6 z-20">
-				<button className="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl shadow-lg">
-					Daftar Sekarang
-				</button>
 			</div>
 		</div>
 	);

@@ -1,19 +1,18 @@
 import Link from "next/link";
 import { getBaseUrl } from "@/lib/utils";
 import { Category } from "@/types";
-import * as Icons from "lucide-react"; // Import semua icon
+import { getIconComponent } from "@/lib/icons";
 
-// Tambahkan opsi ini agar Next.js tidak men-cache halaman kosong saat dev
 export const dynamic = "force-dynamic";
 
 async function getCategories() {
 	try {
 		const res = await fetch(`${getBaseUrl()}/api/categories`, {
-			cache: "no-store", // Pastikan selalu ambil data terbaru dari DB
+			cache: "no-store",
 		});
 		if (!res.ok) return [];
 		return res.json() as Promise<Category[]>;
-	} catch (e) {
+	} catch {
 		return [];
 	}
 }
@@ -35,10 +34,7 @@ export default async function CategoriesPage() {
 			) : (
 				<div className="grid grid-cols-2 gap-4">
 					{categories.map((cat) => {
-						// Aman mengambil icon: Cek apakah ada di library Lucide, jika tidak pakai 'Circle'
-						const IconComponent = Icons[cat.icon]
-							? Icons[cat.icon]
-							: Icons.CircleHelp;
+						const IconComponent = getIconComponent(cat.icon);
 
 						return (
 							<Link
