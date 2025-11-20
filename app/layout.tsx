@@ -32,9 +32,9 @@ export default function RootLayout({
 
 				{/* Main Content Wrapper */}
 				{/* md:pl-64 pushes content to the right when sidebar is visible */}
-				<main className="md:pl-64 min-h-screen transition-all duration-300">
+				<main className="md:pl-64 min-h-screen transition-all duration-300 bg-gray-50">
 					{/* Container to limit width on ultra-wide screens */}
-					<div className="max-w-7xl mx-auto min-h-screen pb-20 md:pb-0">
+					<div className="mx-auto min-h-screen pb-20 md:pb-0 bg-gray-50">
 						{children}
 					</div>
 				</main>
