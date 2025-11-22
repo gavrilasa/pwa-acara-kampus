@@ -84,13 +84,11 @@ export default function FavoritesPage() {
 
 	return (
 		<div className="pb-24 min-h-screen bg-gray-50">
-			{/* Header dengan Indikator Sync Halus */}
 			<div className="bg-white/80 backdrop-blur-md px-6 py-4 border-b border-gray-200 sticky top-0 z-30 flex justify-between items-center transition-all">
 				<h1 className="text-xl font-bold text-gray-900 tracking-tight">
 					Favorit Saya
 				</h1>
 
-				{/* Indikator visual saat sedang mengambil data baru */}
 				<div
 					className={`flex items-center gap-2 text-xs font-medium text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full transition-opacity duration-500 ${
 						isSyncing ? "opacity-100" : "opacity-0"
@@ -105,13 +103,10 @@ export default function FavoritesPage() {
 				{favorites.length > 0 ? (
 					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
 						{favorites.map((fav) => (
-							// EventCard menerima prop Event, FavoriteSnapshot adalah subset-nya.
-							// Secara runtime ini aman karena EventCard hanya render field yang ada di Snapshot.
 							<EventCard key={fav.id} event={fav as unknown as Event} />
 						))}
 					</div>
 				) : (
-					// Tampilan Empty State yang lebih estetik
 					<div className="flex flex-col items-center justify-center py-32 text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
 						<div className="bg-white p-6 rounded-full shadow-sm mb-6 ring-1 ring-gray-100">
 							<HeartOff size={48} className="text-gray-300" />

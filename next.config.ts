@@ -6,7 +6,7 @@ const withPWA = withPWAInit({
 	cacheOnFrontEndNav: true,
 	aggressiveFrontEndNavCaching: true,
 	reloadOnOnline: true,
-	disable: false, // Wajib false agar jalan
+	disable: process.env.NODE_ENV === "development",
 	// Pastikan SW mengontrol halaman secepat mungkin
 	workboxOptions: {
 		disableDevLogs: false, // Nyalakan log di dev agar terlihat di console

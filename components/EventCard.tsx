@@ -3,6 +3,16 @@ import Link from "next/link";
 import { Calendar, MapPin } from "lucide-react";
 import { Event } from "@/types";
 
+// Import komponen Shadcn UI
+import {
+	Card,
+	CardContent,
+	CardFooter,
+	CardHeader,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+
 export default function EventCard({ event }: { event: Event }) {
 	const eventDate = new Date(event.date).toLocaleDateString("id-ID", {
 		day: "numeric",
@@ -11,48 +21,57 @@ export default function EventCard({ event }: { event: Event }) {
 	});
 
 	return (
-		<Link href={`/events/${event.id}`} className="block group">
-			<div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
-				{/* Image Placeholder / Actual Image */}
-				<div className="relative h-40 w-full bg-gray-200">
-					{event.imageUrl ? (
-						<Image
-							src={event.imageUrl}
-							alt={event.title}
-							fill
-							className="object-cover"
-						/>
-					) : (
-						<div className="flex items-center justify-center h-full text-gray-400">
-							No Image
-						</div>
-					)}
-				</div>
+		<Link href={`/events/${event.id}`} className="block group h-full">
+			<Card className="pt-0 h-full gap-0 overflow-hidden border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:shadow-md hover:border-indigo-200 hover:-translate-y-1">
+				<CardHeader className="p-0">
+					<AspectRatio ratio={16 / 9}>
+						{event.imageUrl ? (
+							<Image
+								src={event.imageUrl}
+								alt={event.title}
+								fill
+								className="object-cover transition-transform duration-500 group-hover:scale-105"
+								sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+							/>
+						) : (
+							<div className="flex h-full w-full items-center justify-center bg-zinc-100 text-zinc-400">
+								<span className="text-sm font-medium">No Image</span>
+							</div>
+						)}
+					</AspectRatio>
+				</CardHeader>
 
-				<div className="p-4">
-					{/* Kategori Badge */}
-					{event.category && (
-						<span className="inline-block px-2 py-1 mb-2 text-xs font-semibold text-blue-600 bg-blue-50 rounded-full">
-							{event.category.name}
-						</span>
-					)}
-
-					<h3 className="text-lg font-bold text-gray-900 line-clamp-1 group-hover:text-blue-600">
+				{/* Content: Judul & Info Lokasi */}
+				<CardContent className="px-4 py-2 flex flex-col gap-2">
+					<h3 className="font-bold text-lg text-zinc-900 line-clamp-1 group-hover:text-indigo-600 transition-colors">
 						{event.title}
 					</h3>
 
-					<div className="mt-3 space-y-1 text-sm text-gray-500">
-						<div className="flex items-center gap-2">
-							<Calendar size={16} />
-							<span>{eventDate}</span>
-						</div>
-						<div className="flex items-center gap-2">
-							<MapPin size={16} />
-							<span className="line-clamp-1">{event.location}</span>
-						</div>
+					<div className="flex items-center gap-2 text-sm text-zinc-500">
+						<MapPin size={14} className="shrink-0 text-indigo-500" />
+						<span className="line-clamp-1">{event.location}</span>
 					</div>
-				</div>
-			</div>
+				</CardContent>
+
+				{/* Footer: Kategori & Tanggal */}
+				<CardFooter className="px-4 py-2 flex justify-between items-center">
+					{event.category ? (
+						<Badge
+							variant="secondary"
+							className="font-medium bg-zinc-100 text-zinc-600 hover:bg-indigo-50 hover:text-indigo-600"
+						>
+							{event.category.name}
+						</Badge>
+					) : (
+						<div /> /* Spacer jika tidak ada kategori */
+					)}
+
+					<div className="flex items-center gap-1.5 text-xs font-medium text-zinc-400">
+						<Calendar size={12} />
+						<span>{eventDate}</span>
+					</div>
+				</CardFooter>
+			</Card>
 		</Link>
 	);
 }

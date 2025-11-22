@@ -1,8 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import BottomNav from "@/components/BottomNav";
-import Sidebar from "@/components/Sidebar";
+import MobileDock from "@/components/MobileDock";
+import AppSidebar from "@/components/Sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -27,20 +28,13 @@ export default function RootLayout({
 	return (
 		<html lang="id">
 			<body className={`${inter.className} bg-gray-50 min-h-screen`}>
-				{/* Desktop Sidebar */}
-				<Sidebar />
-
-				{/* Main Content Wrapper */}
-				{/* md:pl-64 pushes content to the right when sidebar is visible */}
-				<main className="md:pl-64 min-h-screen transition-all duration-300 bg-gray-50">
-					{/* Container to limit width on ultra-wide screens */}
-					<div className="mx-auto min-h-screen pb-20 md:pb-0 bg-gray-50">
-						{children}
-					</div>
-				</main>
-
-				{/* Mobile Bottom Nav */}
-				<BottomNav />
+				<SidebarProvider>
+					<AppSidebar />
+					<SidebarInset className="flex min-h-screen w-full bg-zinc-50 transition-all duration-300">
+						<div className="flex-1">{children}</div>
+					</SidebarInset>
+					<MobileDock />
+				</SidebarProvider>
 			</body>
 		</html>
 	);

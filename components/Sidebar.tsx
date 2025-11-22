@@ -2,9 +2,23 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Grid, Heart, Info, CalendarDays } from "lucide-react";
+import { Home, Grid, Heart, Info, Sparkles } from "lucide-react";
 
-export default function Sidebar() {
+import {
+	Sidebar,
+	SidebarContent,
+	SidebarFooter,
+	SidebarGroup,
+	SidebarGroupContent,
+	SidebarGroupLabel,
+	SidebarHeader,
+	SidebarMenu,
+	SidebarMenuButton,
+	SidebarMenuItem,
+	SidebarRail,
+} from "@/components/ui/sidebar";
+
+export default function AppSidebar() {
 	const pathname = usePathname();
 
 	const navItems = [
@@ -15,40 +29,63 @@ export default function Sidebar() {
 	];
 
 	return (
-		<aside className="hidden md:flex flex-col w-64 h-screen fixed top-0 left-0 border-r border-gray-200 bg-white z-50">
-			{/* Logo Area */}
-			<div className="p-6 flex items-center gap-3 border-b border-gray-100">
-				<div className="bg-blue-600 p-2 rounded-lg text-white">
-					<CalendarDays size={24} />
+		// collapsible="icon" memungkinkan sidebar menyusut jadi ikon saja
+		// hidden md:flex memastikan sidebar BENAR-BENAR HILANG di mobile agar tidak bentrok dengan MobileDock
+		<Sidebar collapsible="icon" className="hidden md:flex border-r-zinc-200">
+			<SidebarHeader>
+				<SidebarMenu>
+					<SidebarMenuItem>
+						<SidebarMenuButton size="lg" asChild>
+							<Link href="/">
+								<div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-indigo-600 text-white">
+									<Sparkles className="size-4" />
+								</div>
+								<div className="flex flex-col gap-0.5 leading-none">
+									<span className="font-semibold text-zinc-900">
+										KampusEvent
+									</span>
+									<span className="text-zinc-500">v2.0</span>
+								</div>
+							</Link>
+						</SidebarMenuButton>
+					</SidebarMenuItem>
+				</SidebarMenu>
+			</SidebarHeader>
+
+			<SidebarContent>
+				<SidebarGroup>
+					<SidebarGroupLabel>Menu Utama</SidebarGroupLabel>
+					<SidebarGroupContent>
+						<SidebarMenu>
+							{navItems.map((item) => (
+								<SidebarMenuItem key={item.label}>
+									<SidebarMenuButton
+										asChild
+										tooltip={item.label} // Tooltip muncul otomatis saat collapsed
+										isActive={pathname === item.href}
+										className="hover:bg-zinc-100 data-[active=true]:bg-indigo-50 data-[active=true]:text-indigo-700"
+									>
+										<Link href={item.href}>
+											<item.icon />
+											<span>{item.label}</span>
+										</Link>
+									</SidebarMenuButton>
+								</SidebarMenuItem>
+							))}
+						</SidebarMenu>
+					</SidebarGroupContent>
+				</SidebarGroup>
+			</SidebarContent>
+
+			<SidebarFooter>
+				{/* Footer content yang akan hilang saat collapsed */}
+				<div className="p-2 text-xs text-zinc-400 text-center opacity-100 group-data-[collapsible=icon]:opacity-0 transition-opacity">
+					© 2025 KampusEvent
 				</div>
-				<span className="text-xl font-bold text-blue-900">KampusEvent</span>
-			</div>
+			</SidebarFooter>
 
-			{/* Navigation Links */}
-			<nav className="flex-1 p-4 space-y-2">
-				{navItems.map((item) => {
-					const isActive = pathname === item.href;
-					return (
-						<Link
-							key={item.href}
-							href={item.href}
-							className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-								isActive
-									? "bg-blue-50 text-blue-600 font-semibold"
-									: "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
-							}`}
-						>
-							<item.icon size={20} strokeWidth={isActive ? 2.5 : 2} />
-							<span>{item.label}</span>
-						</Link>
-					);
-				})}
-			</nav>
-
-			{/* Footer Area */}
-			<div className="p-4 border-t border-gray-100 text-xs text-gray-400">
-				© 2025 KampusEvent PWA
-			</div>
-		</aside>
+			{/* Rail memungkinkan user click/drag border untuk resize/collapse sidebar */}
+			<SidebarRail />
+		</Sidebar>
 	);
 }
