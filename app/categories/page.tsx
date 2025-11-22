@@ -1,25 +1,51 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { getBaseUrl } from "@/lib/utils";
 import { Category } from "@/types";
 import { getIconComponent } from "@/lib/icons";
+import { Skeleton } from "@/components/ui/skeleton"; // Pastikan punya Skeleton atau ganti div biasa
 
-export const dynamic = "force-dynamic";
+export default function CategoriesPage() {
+	const [categories, setCategories] = useState<Category[]>([]);
+	const [isLoading, setIsLoading] = useState(true);
 
-async function getCategories() {
-	try {
-		const res = await fetch(`${getBaseUrl()}/api/categories`, {
-			cache: "no-store",
-		});
-		if (!res.ok) return [];
-		return res.json() as Promise<Category[]>;
-	} catch {
-		return [];
-	}
-}
+	useEffect(() => {
+		const CACHE_KEY = "categories-cache";
 
-export default async function CategoriesPage() {
-	const categories = await getCategories();
+		// 1. Load Offline Cache dulu (Instant Load)
+		try {
+			const cachedData = localStorage.getItem(CACHE_KEY);
+			if (cachedData) {
+				setCategories(JSON.parse(cachedData));
+				setIsLoading(false); // Jika ada cache, loading selesai di mata user
+			}
+		} catch (e) {
+			console.error("Gagal membaca cache kategori", e);
+		}
+
+		// 2. Fetch Data Terbaru (Network First / Revalidate)
+		const fetchData = async () => {
+			try {
+				// Gunakan path relative untuk client-side fetch
+				const res = await fetch("/api/categories");
+				if (res.ok) {
+					const data: Category[] = await res.json();
+
+					setCategories(data);
+					// 3. Update Cache
+					localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+				}
+			} catch (error) {
+				console.log("Offline mode: Menggunakan data cache kategori.");
+			} finally {
+				setIsLoading(false);
+			}
+		};
+
+		fetchData();
+	}, []);
 
 	return (
 		<div className="min-h-screen bg-zinc-50 pb-24">
@@ -33,15 +59,27 @@ export default async function CategoriesPage() {
 
 			<section className="py-6">
 				<div className="container mx-auto px-4 md:px-6">
-					{categories.length === 0 ? (
-						<div className="text-center py-20 text-zinc-500 bg-white rounded-2xl border border-dashed border-zinc-200  animate-in fade-in slide-in-from-bottom-4 duration-700">
+					{isLoading && categories.length === 0 ? (
+						// Loading State
+						<div className="grid gap-6 lg:grid-cols-2">
+							{[1, 2, 3, 4].map((i) => (
+								<Skeleton key={i} className="h-48 w-full rounded-2xl" />
+							))}
+						</div>
+					) : categories.length === 0 ? (
+						// Empty State
+						<div className="text-center py-20 text-zinc-500 bg-white rounded-2xl border border-dashed border-zinc-200 animate-in fade-in slide-in-from-bottom-4 duration-700">
 							<p>Tidak ada kategori ditemukan.</p>
-							<p className="text-xs mt-2">Coba jalankan seed database lagi.</p>
+							<p className="text-xs mt-2">
+								Pastikan Anda terhubung ke internet untuk sinkronisasi pertama.
+							</p>
 						</div>
 					) : (
-						<div className="grid gap-6 lg:grid-cols-2  animate-in fade-in slide-in-from-bottom-4 duration-700">
+						// Content List
+						<div className="grid gap-6 lg:grid-cols-2 animate-in fade-in slide-in-from-bottom-4 duration-700">
 							{categories.map((cat, index) => {
 								const IconComponent = getIconComponent(cat.icon);
+								// Gunakan gambar placeholder statis/cacheable
 								const placeholderImage = `https://images.unsplash.com/photo-${
 									[
 										"1519389950473-47ba0277781c",
@@ -99,8 +137,7 @@ export default async function CategoriesPage() {
 										<div className="p-6 md:p-8 bg-zinc-50/50">
 											<p className="text-zinc-500 text-sm leading-relaxed line-clamp-2">
 												Temukan berbagai kegiatan seru seputar {cat.name} di
-												kampus. Mulai dari seminar, lomba, hingga workshop
-												eksklusif.
+												kampus.
 											</p>
 										</div>
 									</div>

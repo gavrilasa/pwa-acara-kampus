@@ -66,7 +66,7 @@ const withPWA = withPWAInit({
 			// 6. Fallback untuk Halaman HTML
 			{
 				urlPattern: ({ request }) => request.mode === "navigate",
-				handler: "NetworkFirst",
+				handler: "StaleWhileRevalidate",
 				options: {
 					cacheName: "pages",
 					expiration: { maxEntries: 50, maxAgeSeconds: 24 * 60 * 60 },

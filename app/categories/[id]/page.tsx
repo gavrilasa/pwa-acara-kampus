@@ -1,39 +1,113 @@
-import { notFound } from "next/navigation";
+"use client";
+
+import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, Calendar, MapPin, ArrowRight } from "lucide-react";
-import { getBaseUrl } from "@/lib/utils";
+import {
+	ArrowLeft,
+	Calendar,
+	MapPin,
+	ArrowRight,
+	Loader2,
+	AlertCircle,
+} from "lucide-react";
 import { Category, Event } from "@/types";
-import { Badge } from "@/components/ui/badge"; // Assuming you have this from shadcn
-import { Button } from "@/components/ui/button"; // Assuming you have this from shadcn
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
-// Interface for API response combining Category + Events
+// Interface khusus untuk page ini (gabungan Kategori + Events)
 interface CategoryWithEvents extends Category {
 	events: Event[];
 }
 
-async function getCategoryDetail(id: string) {
-	try {
-		const res = await fetch(`${getBaseUrl()}/api/categories/${id}`, {
-			cache: "no-store",
-		});
-		if (!res.ok) return null;
-		return res.json() as Promise<CategoryWithEvents>;
-	} catch (error) {
-		console.error("Error fetching category detail:", error);
-		return null;
+export default function CategoryDetailPage() {
+	// 1. Ambil ID dari URL menggunakan hook Client Side
+	const params = useParams();
+	const id = params.id as string;
+
+	const [data, setData] = useState<CategoryWithEvents | null>(null);
+	const [isLoading, setIsLoading] = useState(true);
+	const [isError, setIsError] = useState(false);
+
+	useEffect(() => {
+		if (!id) return;
+
+		const CACHE_KEY = `category_detail_${id}`;
+
+		// 2. Load Cache Lokal (Instant Load)
+		try {
+			const cachedData = localStorage.getItem(CACHE_KEY);
+			if (cachedData) {
+				setData(JSON.parse(cachedData));
+				setIsLoading(false); // Jika ada cache, anggap loading selesai (user bisa melihat konten)
+			}
+		} catch (e) {
+			console.error("Gagal membaca cache kategori", e);
+		}
+
+		// 3. Fetch Data Network (Background Revalidation)
+		const fetchData = async () => {
+			try {
+				const res = await fetch(`/api/categories/${id}`);
+
+				if (!res.ok) {
+					// Jika 404 dan tidak ada cache, set error
+					if (!localStorage.getItem(CACHE_KEY)) setIsError(true);
+					return;
+				}
+
+				const serverData: CategoryWithEvents = await res.json();
+
+				// Update state dengan data terbaru
+				setData(serverData);
+
+				// 4. Update Cache
+				localStorage.setItem(CACHE_KEY, JSON.stringify(serverData));
+				setIsError(false);
+			} catch (error) {
+				console.log("Offline: Menampilkan data kategori dari cache.");
+				// Jika fetch gagal (offline) dan tidak ada cache sama sekali
+				if (!localStorage.getItem(CACHE_KEY)) setIsError(true);
+			} finally {
+				setIsLoading(false);
+			}
+		};
+
+		fetchData();
+	}, [id]);
+
+	// --- RENDER STATES ---
+
+	if (isLoading && !data) {
+		return (
+			<div className="min-h-screen flex items-center justify-center bg-zinc-50">
+				<Loader2 className="size-8 animate-spin text-indigo-600" />
+			</div>
+		);
 	}
-}
 
-export default async function CategoryDetailPage({
-	params,
-}: {
-	params: Promise<{ id: string }>;
-}) {
-	const { id } = await params;
-	const data = await getCategoryDetail(id);
+	if (isError || !data) {
+		return (
+			<div className="min-h-screen flex flex-col items-center justify-center bg-zinc-50 p-4 text-center">
+				<div className="bg-red-50 p-4 rounded-full mb-4">
+					<AlertCircle className="size-8 text-red-500" />
+				</div>
+				<h2 className="text-xl font-bold text-zinc-900">
+					Kategori Tidak Ditemukan
+				</h2>
+				<p className="text-zinc-500 mt-2 mb-6 max-w-xs">
+					Data tidak ditemukan atau Anda sedang offline dan belum pernah membuka
+					kategori ini.
+				</p>
+				<Button asChild variant="outline">
+					<Link href="/categories">Kembali ke Daftar Kategori</Link>
+				</Button>
+			</div>
+		);
+	}
 
-	if (!data) return notFound();
+	// --- RENDER UTAMA (Sama seperti sebelumnya) ---
 
 	return (
 		<div className="min-h-screen bg-zinc-50 pb-24">
@@ -52,7 +126,7 @@ export default async function CategoryDetailPage({
 						</h1>
 						<p className="text-xs text-zinc-500 md:text-sm">
 							{data.events.length} event{data.events.length !== 1 ? "s" : ""}{" "}
-							available
+							tersedia
 						</p>
 					</div>
 				</div>

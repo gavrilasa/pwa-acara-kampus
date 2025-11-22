@@ -7,7 +7,7 @@ import { Event } from "@/types";
 import { Prisma } from "@prisma/client";
 import { Marquee } from "@/components/ui/marquee";
 import { Input } from "@/components/ui/input";
-import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 // Revalidate data setiap 60 detik (ISR)
 export const revalidate = 60;
@@ -50,9 +50,10 @@ export default async function Home() {
 	]);
 
 	return (
-		<div className="min-h-screen bg-zinc-50 pb-24 md:pb-10">
+		<div className="w-full min-h-screen bg-zinc-50 pb-24 md:pb-10 overflow-x-hidden">
+			{/* HEADER */}
 			<header className="sticky top-0 z-40 w-full border-b border-zinc-200 bg-white/80 backdrop-blur-xl supports-backdrop-filter:bg-white/60">
-				<div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
+				<div className="flex h-16 items-center justify-between px-4 md:px-6 w-full">
 					<div className="flex items-center gap-2">
 						<div className="hidden md:flex h-8 w-8 items-center justify-center rounded-lg">
 							<SidebarTrigger />
@@ -75,10 +76,12 @@ export default async function Home() {
 				</div>
 			</header>
 
-			<main className="container mx-auto px-4 md:px-6">
+			{/* MAIN CONTENT */}
+			<main className="w-full max-w-[1600px] mx-auto px-4 md:px-6">
 				{featuredEvents.length > 0 && (
-					<section className="mt-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-						<div className="px-4 md:px-8 mb-4">
+					// PERBAIKAN: Tambahkan 'max-w-full' dan 'overflow-hidden' pada section pembungkus
+					<section className="mt-6 animate-in fade-in slide-in-from-bottom-4 duration-500 w-full max-w-full overflow-hidden">
+						<div className="mb-4 px-2">
 							<h2 className="text-lg md:text-xl font-bold text-gray-800 flex items-center gap-2">
 								Highlight{" "}
 								<span className="text-blue-500 text-xs px-2 py-0.5 bg-blue-50 rounded-full">
@@ -87,37 +90,38 @@ export default async function Home() {
 							</h2>
 						</div>
 
-						<div className="relative flex w-full flex-col items-center justify-center overflow-hidden">
-							<Marquee pauseOnHover className="[--duration:40s] py-2">
-								{featuredEvents.map((event) => (
-									<Link
-										key={event.id}
-										href={`/events/${event.id}`}
-										// Menambahkan mx-3 untuk memberikan jarak antar kartu di dalam Marquee
-										className="mx-3 block w-72 md:w-96 h-44 md:h-56 relative rounded-2xl overflow-hidden bg-gray-200 shadow-md hover:shadow-xl transition-all group"
-									>
-										{event.imageUrl ? (
-											<Image
-												src={event.imageUrl}
-												alt={event.title}
-												fill
-												className="object-cover brightness-[0.8] group-hover:brightness-100 group-hover:scale-105 transition-all duration-700"
-											/>
-										) : (
-											<div className="w-full h-full bg-linear-to-br from-blue-400 to-indigo-600" />
-										)}
-										<div className="absolute bottom-0 left-0 p-5 text-white w-full bg-linear-to-t from-black/80 via-black/40 to-transparent">
-											<span className="text-[10px] uppercase tracking-wider font-bold bg-blue-600 px-2 py-1 rounded mb-2 inline-block shadow-sm">
-												Featured
-											</span>
-											<h3 className="font-bold truncate text-lg leading-tight text-shadow-sm">
-												{event.title}
-											</h3>
-										</div>
-									</Link>
-								))}
-							</Marquee>
-
+						<div className="relative w-full overflow-hidden rounded-2xl">
+							<div className="max-w-[90vw] md:max-w-[calc(100vw-18rem)] overflow-hidden mx-auto">
+								<Marquee pauseOnHover className="[--duration:40s] py-2">
+									{featuredEvents.map((event) => (
+										<Link
+											key={event.id}
+											href={`/events/${event.id}`}
+											// Pastikan item marquee juga tidak memiliki width statis yang aneh, width di sini aman
+											className="mx-3 block w-72 md:w-96 h-44 md:h-56 relative rounded-2xl overflow-hidden bg-gray-200 shadow-md hover:shadow-xl transition-all group"
+										>
+											{event.imageUrl ? (
+												<Image
+													src={event.imageUrl}
+													alt={event.title}
+													fill
+													className="object-cover brightness-[0.8] group-hover:brightness-100 group-hover:scale-105 transition-all duration-700"
+												/>
+											) : (
+												<div className="w-full h-full bg-linear-to-br from-blue-400 to-indigo-600" />
+											)}
+											<div className="absolute bottom-0 left-0 p-5 text-white w-full bg-linear-to-t from-black/80 via-black/40 to-transparent">
+												<span className="text-[10px] uppercase tracking-wider font-bold bg-blue-600 px-2 py-1 rounded mb-2 inline-block shadow-sm">
+													Featured
+												</span>
+												<h3 className="font-bold truncate text-lg leading-tight text-shadow-sm">
+													{event.title}
+												</h3>
+											</div>
+										</Link>
+									))}
+								</Marquee>
+							</div>
 							<div className="pointer-events-none absolute inset-y-0 left-0 w-6 bg-linear-to-r from-gray-50 to-transparent z-10"></div>
 							<div className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-linear-to-l from-gray-50 to-transparent z-10"></div>
 						</div>
@@ -125,7 +129,7 @@ export default async function Home() {
 				)}
 
 				<section className="mt-10">
-					<div className="mb-6 flex items-center justify-between">
+					<div className="mb-6 flex items-center justify-between px-2">
 						<h2 className="text-2xl font-bold tracking-tight text-zinc-900">
 							Terbaru
 						</h2>

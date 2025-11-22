@@ -1,3 +1,4 @@
+// app/layout.tsx
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
@@ -30,7 +31,7 @@ export default function RootLayout({
 			<body className={`${inter.className} bg-gray-50 min-h-screen`}>
 				<SidebarProvider>
 					<AppSidebar />
-					<SidebarInset className="flex min-h-screen w-full bg-zinc-50 transition-all duration-300">
+					<SidebarInset className="flex min-h-screen bg-zinc-50 transition-all duration-300">
 						<div className="flex-1">{children}</div>
 					</SidebarInset>
 					<MobileDock />
