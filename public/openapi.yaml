@@ -1,0 +1,221 @@
+openapi: 3.0.0
+info:
+  title: Acara Kampus API
+  version: 1.0.0
+  description: Dokumentasi API statis untuk aplikasi PWA Acara Kampus.
+servers:
+  - url: http://localhost:3000
+    description: Local Server
+  - url: https://pwa-acara-kampus.vercel.app
+    description: Production Server
+
+components:
+  schemas:
+    Event:
+      type: object
+      properties:
+        id:
+          type: string
+          example: cm4...
+        title:
+          type: string
+          example: Seminar Nasional Teknologi
+        description:
+          type: string
+          example: Deskripsi lengkap acara...
+        date:
+          type: string
+          format: date-time
+        location:
+          type: string
+          example: Gedung Serba Guna
+        imageUrl:
+          type: string
+          nullable: true
+        isFeatured:
+          type: boolean
+          default: false
+        categoryId:
+          type: string
+        organizerId:
+          type: string
+        category:
+          $ref: "#/components/schemas/Category"
+        organizer:
+          $ref: "#/components/schemas/Organizer"
+
+    EventInput:
+      type: object
+      required:
+        - title
+        - description
+        - date
+        - location
+        - categoryId
+        - organizerId
+      properties:
+        title:
+          type: string
+          minLength: 5
+          maxLength: 150
+        description:
+          type: string
+          minLength: 20
+        date:
+          type: string
+          format: date-time
+        location:
+          type: string
+          minLength: 3
+        imageUrl:
+          type: string
+          format: uri
+          nullable: true
+        isFeatured:
+          type: boolean
+          default: false
+        categoryId:
+          type: string
+          format: cuid
+        organizerId:
+          type: string
+          format: cuid
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        icon:
+          type: string
+
+    CategoryInput:
+      type: object
+      required:
+        - name
+        - icon
+      properties:
+        name:
+          type: string
+        icon:
+          type: string
+
+    Organizer:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        contact:
+          type: string
+        description:
+          type: string
+          nullable: true
+
+paths:
+  /api/events:
+    get:
+      summary: Get list of events
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: q
+          in: query
+          schema:
+            type: string
+          description: Search query
+        - name: ids
+          in: query
+          schema:
+            type: string
+          description: Comma-separated IDs
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Event"
+    post:
+      summary: Create new event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EventInput"
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Validation Error
+
+  /api/events/{id}:
+    get:
+      summary: Get event detail
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Event"
+        "404":
+          description: Not Found
+
+  /api/categories:
+    get:
+      summary: Get all categories
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+    post:
+      summary: Create category
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryInput"
+      responses:
+        "201":
+          description: Created
+
+  /api/categories/{id}:
+    get:
+      summary: Get category detail with events
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Success
+        "404":
+          description: Not Found
