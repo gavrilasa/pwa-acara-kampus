@@ -1,10 +1,8 @@
 "use client";
 
-import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, Grid, Heart, Info } from "lucide-react";
-
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { Dock, DockIcon } from "@/components/ui/dock";
@@ -39,6 +37,7 @@ export default function MobileDock() {
 									<TooltipTrigger asChild>
 										<Link
 											href={item.href}
+											prefetch={true}
 											className={cn(
 												buttonVariants({ variant: "ghost", size: "icon" }),
 												"size-12 rounded-full transition-colors",

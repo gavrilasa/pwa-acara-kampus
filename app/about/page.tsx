@@ -1,4 +1,4 @@
-import { Github, Instagram, Mail } from "lucide-react";
+import { Github, Instagram } from "lucide-react";
 
 export default function AboutPage() {
 	return (

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Search, Sparkles } from "lucide-react";
+import { Command, Search } from "lucide-react";
 import prisma from "@/lib/prisma";
 import EventFeed from "@/components/EventFeed";
 import { Event } from "@/types";
@@ -9,7 +9,6 @@ import { Marquee } from "@/components/ui/marquee";
 import { Input } from "@/components/ui/input";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
-// Revalidate data setiap 60 detik (ISR)
 export const revalidate = 60;
 
 type EventWithCategory = Prisma.EventGetPayload<{
@@ -51,7 +50,6 @@ export default async function Home() {
 
 	return (
 		<div className="w-full min-h-screen bg-zinc-50 pb-24 md:pb-10 overflow-x-hidden">
-			{/* HEADER */}
 			<header className="sticky top-0 z-40 w-full border-b border-zinc-200 bg-white/80 backdrop-blur-xl supports-backdrop-filter:bg-white/60">
 				<div className="flex h-16 items-center justify-between px-4 md:px-6 w-full">
 					<div className="flex items-center gap-2">
@@ -59,7 +57,7 @@ export default async function Home() {
 							<SidebarTrigger />
 						</div>
 						<div className="md:hidden flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-600 text-white p-2">
-							<Sparkles className="size-5" />
+							<Command className="size-5" />
 						</div>
 					</div>
 
@@ -76,10 +74,8 @@ export default async function Home() {
 				</div>
 			</header>
 
-			{/* MAIN CONTENT */}
 			<main className="w-full max-w-[1600px] mx-auto px-4 md:px-6">
 				{featuredEvents.length > 0 && (
-					// PERBAIKAN: Tambahkan 'max-w-full' dan 'overflow-hidden' pada section pembungkus
 					<section className="mt-6 animate-in fade-in slide-in-from-bottom-4 duration-500 w-full max-w-full overflow-hidden">
 						<div className="mb-4 px-2">
 							<h2 className="text-lg md:text-xl font-bold text-gray-800 flex items-center gap-2">
@@ -97,7 +93,6 @@ export default async function Home() {
 										<Link
 											key={event.id}
 											href={`/events/${event.id}`}
-											// Pastikan item marquee juga tidak memiliki width statis yang aneh, width di sini aman
 											className="mx-3 block w-72 md:w-96 h-44 md:h-56 relative rounded-2xl overflow-hidden bg-gray-200 shadow-md hover:shadow-xl transition-all group"
 										>
 											{event.imageUrl ? (

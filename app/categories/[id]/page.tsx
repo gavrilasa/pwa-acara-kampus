@@ -16,13 +16,11 @@ import { Category, Event } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-// Interface khusus untuk page ini (gabungan Kategori + Events)
 interface CategoryWithEvents extends Category {
 	events: Event[];
 }
 
 export default function CategoryDetailPage() {
-	// 1. Ambil ID dari URL menggunakan hook Client Side
 	const params = useParams();
 	const id = params.id as string;
 
@@ -35,39 +33,33 @@ export default function CategoryDetailPage() {
 
 		const CACHE_KEY = `category_detail_${id}`;
 
-		// 2. Load Cache Lokal (Instant Load)
 		try {
 			const cachedData = localStorage.getItem(CACHE_KEY);
 			if (cachedData) {
 				setData(JSON.parse(cachedData));
-				setIsLoading(false); // Jika ada cache, anggap loading selesai (user bisa melihat konten)
+				setIsLoading(false);
 			}
 		} catch (e) {
 			console.error("Gagal membaca cache kategori", e);
 		}
 
-		// 3. Fetch Data Network (Background Revalidation)
 		const fetchData = async () => {
 			try {
 				const res = await fetch(`/api/categories/${id}`);
 
 				if (!res.ok) {
-					// Jika 404 dan tidak ada cache, set error
 					if (!localStorage.getItem(CACHE_KEY)) setIsError(true);
 					return;
 				}
 
 				const serverData: CategoryWithEvents = await res.json();
 
-				// Update state dengan data terbaru
 				setData(serverData);
 
-				// 4. Update Cache
 				localStorage.setItem(CACHE_KEY, JSON.stringify(serverData));
 				setIsError(false);
 			} catch (error) {
-				console.log("Offline: Menampilkan data kategori dari cache.");
-				// Jika fetch gagal (offline) dan tidak ada cache sama sekali
+				console.log("Offline: Menampilkan data kategori dari cache." + error);
 				if (!localStorage.getItem(CACHE_KEY)) setIsError(true);
 			} finally {
 				setIsLoading(false);
@@ -76,8 +68,6 @@ export default function CategoryDetailPage() {
 
 		fetchData();
 	}, [id]);
-
-	// --- RENDER STATES ---
 
 	if (isLoading && !data) {
 		return (
@@ -107,11 +97,8 @@ export default function CategoryDetailPage() {
 		);
 	}
 
-	// --- RENDER UTAMA (Sama seperti sebelumnya) ---
-
 	return (
 		<div className="min-h-screen bg-zinc-50 pb-24">
-			{/* Sticky Header */}
 			<div className="sticky top-0 z-30 border-b border-zinc-200 bg-white/80 px-4 py-4 backdrop-blur-md transition-all">
 				<div className="container mx-auto flex items-center gap-4">
 					<Link
@@ -150,7 +137,6 @@ export default function CategoryDetailPage() {
 									key={event.id}
 									className="group relative flex flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm transition-all hover:border-indigo-200 hover:shadow-md md:flex-row md:items-stretch"
 								>
-									{/* Image Section */}
 									<div className="relative aspect-video w-full shrink-0 overflow-hidden bg-zinc-100 md:w-1/3 lg:w-1/4">
 										{event.imageUrl ? (
 											<Image
@@ -165,7 +151,6 @@ export default function CategoryDetailPage() {
 												No Image
 											</div>
 										)}
-										{/* Mobile-only Category Badge */}
 										<div className="absolute left-3 top-3 md:hidden">
 											<Badge
 												variant="secondary"
@@ -176,7 +161,6 @@ export default function CategoryDetailPage() {
 										</div>
 									</div>
 
-									{/* Content Section */}
 									<div className="flex flex-1 flex-col justify-between p-5 md:p-6 lg:p-8">
 										<div className="space-y-3">
 											<div className="hidden items-center justify-between md:flex">
@@ -201,7 +185,6 @@ export default function CategoryDetailPage() {
 												{event.description}
 											</p>
 
-											{/* Metadata Grid */}
 											<div className="mt-2 flex flex-wrap gap-x-6 gap-y-2 text-sm text-zinc-500">
 												<div className="flex items-center gap-2">
 													<Calendar size={16} className="text-indigo-500" />
@@ -221,7 +204,6 @@ export default function CategoryDetailPage() {
 											</div>
 										</div>
 
-										{/* Action Area */}
 										<div className="mt-6 flex items-center pt-4 md:mt-0 md:pt-0 md:justify-end">
 											<Button
 												asChild

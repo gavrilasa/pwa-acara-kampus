@@ -5,23 +5,23 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider        = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-  provider  = "postgresql"
+  provider = "postgresql"
 }
 
 model Category {
   id        String   @id @default(cuid())
   name      String
-  icon      String   // Nama icon dari Lucide React (disimpan sebagai string)
+  icon      String
   createdAt DateTime @default(now())
   events    Event[]
 }
 
 model Organizer {
-  id          String   @id @default(cuid())
+  id          String  @id @default(cuid())
   name        String
   contact     String
   description String?
@@ -36,19 +36,16 @@ model Event {
   location    String
   imageUrl    String?
   isFeatured  Boolean  @default(false)
-  
-  // Relasi Kategori
-  categoryId  String
-  category    Category @relation(fields: [categoryId], references: [id])
 
-  // Relasi Organizer
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
   organizerId String
   organizer   Organizer @relation(fields: [organizerId], references: [id])
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  // Indexing untuk performa query filtering
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([categoryId])
   @@index([date])
 }

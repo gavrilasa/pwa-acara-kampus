@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Category } from "@/types";
 import { getIconComponent } from "@/lib/icons";
-import { Skeleton } from "@/components/ui/skeleton"; // Pastikan punya Skeleton atau ganti div biasa
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function CategoriesPage() {
 	const [categories, setCategories] = useState<Category[]>([]);
@@ -14,31 +14,27 @@ export default function CategoriesPage() {
 	useEffect(() => {
 		const CACHE_KEY = "categories-cache";
 
-		// 1. Load Offline Cache dulu (Instant Load)
 		try {
 			const cachedData = localStorage.getItem(CACHE_KEY);
 			if (cachedData) {
 				setCategories(JSON.parse(cachedData));
-				setIsLoading(false); // Jika ada cache, loading selesai di mata user
+				setIsLoading(false);
 			}
 		} catch (e) {
 			console.error("Gagal membaca cache kategori", e);
 		}
 
-		// 2. Fetch Data Terbaru (Network First / Revalidate)
 		const fetchData = async () => {
 			try {
-				// Gunakan path relative untuk client-side fetch
 				const res = await fetch("/api/categories");
 				if (res.ok) {
 					const data: Category[] = await res.json();
 
 					setCategories(data);
-					// 3. Update Cache
 					localStorage.setItem(CACHE_KEY, JSON.stringify(data));
 				}
 			} catch (error) {
-				console.log("Offline mode: Menggunakan data cache kategori.");
+				console.log("Offline mode: Menggunakan data cache kategori." + error);
 			} finally {
 				setIsLoading(false);
 			}
@@ -60,14 +56,12 @@ export default function CategoriesPage() {
 			<section className="py-6">
 				<div className="container mx-auto px-4 md:px-6">
 					{isLoading && categories.length === 0 ? (
-						// Loading State
 						<div className="grid gap-6 lg:grid-cols-2">
 							{[1, 2, 3, 4].map((i) => (
 								<Skeleton key={i} className="h-48 w-full rounded-2xl" />
 							))}
 						</div>
 					) : categories.length === 0 ? (
-						// Empty State
 						<div className="text-center py-20 text-zinc-500 bg-white rounded-2xl border border-dashed border-zinc-200 animate-in fade-in slide-in-from-bottom-4 duration-700">
 							<p>Tidak ada kategori ditemukan.</p>
 							<p className="text-xs mt-2">
@@ -75,11 +69,9 @@ export default function CategoriesPage() {
 							</p>
 						</div>
 					) : (
-						// Content List
 						<div className="grid gap-6 lg:grid-cols-2 animate-in fade-in slide-in-from-bottom-4 duration-700">
 							{categories.map((cat, index) => {
 								const IconComponent = getIconComponent(cat.icon);
-								// Gunakan gambar placeholder statis/cacheable
 								const placeholderImage = `https://images.unsplash.com/photo-${
 									[
 										"1519389950473-47ba0277781c",
@@ -92,9 +84,9 @@ export default function CategoriesPage() {
 								return (
 									<div
 										key={cat.id}
-										className="flex flex-col justify-between rounded-2xl bg-white border border-zinc-200 shadow-sm overflow-hidden transition-all hover:shadow-md hover:border-indigo-200 group"
+										className="flex flex-col justify-between rounded-2xl bg-white border border-zinc-200 shadow-sm overflow-hidden transition-all hover:shadow-md hover:border-indigo-200 group lg:min-h-88"
 									>
-										<div className="flex justify-between gap-6 border-b border-zinc-100 h-full">
+										<div className="flex justify-between gap-6 border-b border-zinc-100 flex-1">
 											<div className="flex flex-1 flex-col justify-between py-6 pb-2 pl-6 md:py-8 md:pl-8">
 												<div className="space-y-4">
 													<span className="text-xs font-mono font-medium uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2 py-1 rounded w-fit">

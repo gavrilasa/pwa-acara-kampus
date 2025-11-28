@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { Prisma } from "@prisma/client"; // [1] Import tipe Prisma
+import { Prisma } from "@prisma/client";
 import { EventSchema, PaginationSchema } from "@/lib/validations";
 import { z } from "zod";
 
@@ -12,7 +12,6 @@ export async function GET(request: NextRequest) {
 	try {
 		const { page, limit, q, ids } = PaginationSchema.parse(searchParams);
 
-		// Skenario A: Bulk Fetching
 		if (ids && ids.length > 0) {
 			const events = await prisma.event.findMany({
 				where: {
@@ -26,13 +25,10 @@ export async function GET(request: NextRequest) {
 			return NextResponse.json(events);
 		}
 
-		// Skenario B: Pagination & Search
-		// [2] Ganti 'any' dengan tipe spesifik dari Prisma
 		const whereClause: Prisma.EventWhereInput = {};
 
 		if (q) {
 			whereClause.OR = [
-				// mode: 'insensitive' didukung oleh PostgreSQL
 				{ title: { contains: q, mode: "insensitive" } },
 				{ description: { contains: q, mode: "insensitive" } },
 			];

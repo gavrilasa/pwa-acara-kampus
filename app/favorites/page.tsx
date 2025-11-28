@@ -7,7 +7,6 @@ import EventCard from "@/components/EventCard";
 import { Event, FavoriteSnapshot } from "@/types";
 
 export default function FavoritesPage() {
-	// State menyimpan gabungan antara snapshot offline atau data live dari server
 	const [favorites, setFavorites] = useState<FavoriteSnapshot[]>([]);
 	const [isMounted, setIsMounted] = useState(false);
 	const [isSyncing, setIsSyncing] = useState(false);
@@ -15,8 +14,6 @@ export default function FavoritesPage() {
 	useEffect(() => {
 		setIsMounted(true);
 
-		// 1. INSTANT LOAD: Baca langsung dari LocalStorage
-		// User tidak melihat loading spinner, tapi langsung melihat konten terakhir
 		const loadLocalFavorites = () => {
 			try {
 				const stored = localStorage.getItem("favorites");
@@ -33,25 +30,19 @@ export default function FavoritesPage() {
 
 		const localData = loadLocalFavorites();
 
-		// 2. BACKGROUND SYNC: Revalidasi data jika Online
 		if (localData.length > 0 && navigator.onLine) {
 			const revalidateData = async () => {
 				try {
 					setIsSyncing(true);
-					// Ambil semua ID untuk bulk fetch
 					const ids = localData.map((f) => f.id).join(",");
 
-					// Tembak endpoint bulk yang baru kita buat
 					const res = await fetch(`/api/events?ids=${ids}`);
 
 					if (res.ok) {
 						const serverData: Event[] = await res.json();
 
-						// A. Update UI dengan data segar (misal: judul berubah)
-						// Kita casting ke unknown dulu agar kompatibel dengan tipe state
 						setFavorites(serverData as unknown as FavoriteSnapshot[]);
 
-						// B. Perbarui Cache LocalStorage agar offline session berikutnya dapat data baru
 						const freshSnapshots: FavoriteSnapshot[] = serverData.map(
 							(evt) => ({
 								id: evt.id,
@@ -77,7 +68,6 @@ export default function FavoritesPage() {
 		}
 	}, []);
 
-	// Mencegah Hydration Error karena akses localStorage
 	if (!isMounted) {
 		return <div className="min-h-screen bg-gray-50" />;
 	}

@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 export default function EventDetailPage() {
-	// Ambil ID dari URL (Client Side)
 	const params = useParams();
 	const id = params.id as string;
 
@@ -22,23 +21,20 @@ export default function EventDetailPage() {
 
 		const CACHE_KEY = `event_detail_${id}`;
 
-		// 1. Load Cache Lokal
 		try {
 			const cachedData = localStorage.getItem(CACHE_KEY);
 			if (cachedData) {
 				setEvent(JSON.parse(cachedData));
-				setIsLoading(false); // Tampilkan konten cache segera
+				setIsLoading(false);
 			}
 		} catch (e) {
 			console.error("Cache read error", e);
 		}
 
-		// 2. Fetch Data Network (Background Update)
 		const fetchEvent = async () => {
 			try {
 				const res = await fetch(`/api/events/${id}`);
 				if (!res.ok) {
-					// Jika 404 dan tidak ada cache, maka error
 					if (!localStorage.getItem(CACHE_KEY)) setIsError(true);
 					return;
 				}
@@ -46,12 +42,12 @@ export default function EventDetailPage() {
 				const data: Event = await res.json();
 				setEvent(data);
 
-				// 3. Simpan ke Cache
 				localStorage.setItem(CACHE_KEY, JSON.stringify(data));
 				setIsError(false);
 			} catch (error) {
-				console.log("Offline: Menampilkan data event dari cache jika ada.");
-				// Jika fetch gagal dan tidak ada cache sama sekali, set error
+				console.log(
+					"Offline: Menampilkan data event dari cache jika ada." + error
+				);
 				if (!localStorage.getItem(CACHE_KEY)) setIsError(true);
 			} finally {
 				setIsLoading(false);
@@ -87,6 +83,5 @@ export default function EventDetailPage() {
 		);
 	}
 
-	// Render komponen presentasi yang sudah ada
 	return <EventDetailClient event={event} />;
 }

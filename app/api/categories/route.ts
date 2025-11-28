@@ -9,13 +9,12 @@ export async function GET() {
 		return NextResponse.json(categories);
 	} catch (error) {
 		return NextResponse.json(
-			{ error: "Internal Server Error" },
+			{ error: "Internal Server Error" + error },
 			{ status: 500 }
 		);
 	}
 }
 
-// Opsional: Untuk Admin membuat kategori
 export async function POST(request: Request) {
 	try {
 		const body = await request.json();
@@ -28,7 +27,7 @@ export async function POST(request: Request) {
 		return NextResponse.json(category, { status: 201 });
 	} catch (error) {
 		return NextResponse.json(
-			{ error: "Failed to create category" },
+			{ error: "Failed to create category" + error },
 			{ status: 500 }
 		);
 	}

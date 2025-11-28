@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { Heart } from "lucide-react";
 import { FavoriteSnapshot } from "@/types";
 
-// [REF] Props diubah menerima objek, bukan cuma ID string
 interface FavoriteButtonProps {
 	event: FavoriteSnapshot;
 }
@@ -13,7 +12,6 @@ export default function FavoriteButton({ event }: FavoriteButtonProps) {
 	const [isFavorite, setIsFavorite] = useState(false);
 
 	useEffect(() => {
-		// Cek status awal saat komponen mount
 		const checkFavorite = () => {
 			try {
 				const storedFavorites = localStorage.getItem("favorites");
@@ -21,7 +19,6 @@ export default function FavoriteButton({ event }: FavoriteButtonProps) {
 					? JSON.parse(storedFavorites)
 					: [];
 
-				// [LOGIKA BARU] Cek keberadaan ID dalam array objek
 				const exists = favorites.some((fav) => fav.id === event.id);
 				setIsFavorite(exists);
 			} catch (e) {
@@ -32,7 +29,6 @@ export default function FavoriteButton({ event }: FavoriteButtonProps) {
 	}, [event.id]);
 
 	const toggleFavorite = (e: React.MouseEvent) => {
-		// Mencegah navigasi jika tombol berada di dalam Link (misal di Card)
 		e.preventDefault();
 		e.stopPropagation();
 
@@ -43,11 +39,8 @@ export default function FavoriteButton({ event }: FavoriteButtonProps) {
 				: [];
 
 			if (isFavorite) {
-				// [LOGIKA BARU] Hapus: Filter array untuk membuang objek dengan ID yang sama
 				favorites = favorites.filter((fav) => fav.id !== event.id);
 			} else {
-				// [LOGIKA BARU] Tambah: Buat snapshot data minimal untuk disimpan
-				// Kita buat objek baru eksplisit agar tidak menyimpan properti berlebih (seperti description panjang)
 				const snapshot: FavoriteSnapshot = {
 					id: event.id,
 					title: event.title,
@@ -64,12 +57,10 @@ export default function FavoriteButton({ event }: FavoriteButtonProps) {
 				favorites.push(snapshot);
 			}
 
-			// Simpan kembali ke LocalStorage
 			localStorage.setItem("favorites", JSON.stringify(favorites));
 			setIsFavorite(!isFavorite);
 		} catch (e) {
 			console.error("Gagal mengubah status favorit:", e);
-			// Optional: Tambahkan toast notification di sini jika ada
 		}
 	};
 

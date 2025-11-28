@@ -14,8 +14,36 @@ export default function EventFeed({ initialEvents }: EventFeedProps) {
 	const [page, setPage] = useState(2);
 	const [hasMore, setHasMore] = useState(true);
 	const [isLoading, setIsLoading] = useState(false);
+	const [isMounted, setIsMounted] = useState(false);
 
 	const sentinelRef = useRef<HTMLDivElement>(null);
+	const CACHE_KEY = "event-feed-cache";
+
+	useEffect(() => {
+		setIsMounted(true);
+
+		try {
+			const cached = localStorage.getItem(CACHE_KEY);
+			if (cached) {
+				const parsedCache = JSON.parse(cached);
+				if (initialEvents.length === 0 && parsedCache.length > 0) {
+					setEvents(parsedCache);
+				}
+			}
+
+			if (initialEvents.length > 0) {
+				localStorage.setItem(CACHE_KEY, JSON.stringify(initialEvents));
+			}
+		} catch (error) {
+			console.error("Cache initialization error:", error);
+		}
+	}, [initialEvents]);
+
+	useEffect(() => {
+		if (events.length > 0 && isMounted) {
+			localStorage.setItem(CACHE_KEY, JSON.stringify(events));
+		}
+	}, [events, isMounted]);
 
 	useEffect(() => {
 		if (initialEvents.length < 10) {
@@ -24,7 +52,6 @@ export default function EventFeed({ initialEvents }: EventFeedProps) {
 	}, [initialEvents]);
 
 	useEffect(() => {
-		// [FIX]: Simpan ref.current ke variabel lokal agar aman saat cleanup
 		const sentinelEl = sentinelRef.current;
 
 		const observer = new IntersectionObserver(
@@ -45,13 +72,12 @@ export default function EventFeed({ initialEvents }: EventFeedProps) {
 		}
 
 		return () => {
-			// Gunakan variabel lokal 'sentinelEl', bukan 'sentinelRef.current'
 			if (sentinelEl) {
 				observer.unobserve(sentinelEl);
 			}
 		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [hasMore, isLoading, page]); // 'loadMoreEvents' stabil karena ada di scope komponen
+	}, [hasMore, isLoading, page]);
 
 	const loadMoreEvents = async () => {
 		setIsLoading(true);
@@ -64,7 +90,10 @@ export default function EventFeed({ initialEvents }: EventFeedProps) {
 			if (newEvents.length === 0) {
 				setHasMore(false);
 			} else {
-				setEvents((prev) => [...prev, ...newEvents]);
+				setEvents((prev) => {
+					const updatedEvents = [...prev, ...newEvents];
+					return updatedEvents;
+				});
 				setPage((prev) => prev + 1);
 
 				if (newEvents.length < 10) {
@@ -73,16 +102,21 @@ export default function EventFeed({ initialEvents }: EventFeedProps) {
 			}
 		} catch (error) {
 			console.error("Infinite Scroll Error:", error);
+			setHasMore(false);
 		} finally {
 			setIsLoading(false);
 		}
 	};
 
+	if (!isMounted) {
+		return <div className="space-y-6 opacity-0">Loading...</div>;
+	}
+
 	return (
 		<div className="space-y-6">
 			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-				{events.map((event) => (
-					<EventCard key={`${event.id}-${page}`} event={event} />
+				{events.map((event, index) => (
+					<EventCard key={`${event.id}-${index}`} event={event} />
 				))}
 			</div>
 

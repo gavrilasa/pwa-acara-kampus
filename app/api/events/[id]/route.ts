@@ -1,12 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
-export async function GET(
-	request: Request,
-	// PERBAIKAN 1: Tipe params dibungkus Promise
-	{ params }: { params: Promise<{ id: string }> }
-) {
-	// PERBAIKAN 2: Await params sebelum akses properti
+export async function GET({ params }: { params: Promise<{ id: string }> }) {
 	const { id } = await params;
 
 	try {
@@ -25,7 +20,7 @@ export async function GET(
 		return NextResponse.json(event);
 	} catch (error) {
 		return NextResponse.json(
-			{ error: "Internal Server Error" },
+			{ error: "Internal Server Error" + error },
 			{ status: 500 }
 		);
 	}

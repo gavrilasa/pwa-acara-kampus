@@ -2,8 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { Calendar, MapPin } from "lucide-react";
 import { Event } from "@/types";
-
-// Import komponen Shadcn UI
 import {
 	Card,
 	CardContent,
@@ -41,7 +39,6 @@ export default function EventCard({ event }: { event: Event }) {
 					</AspectRatio>
 				</CardHeader>
 
-				{/* Content: Judul & Info Lokasi */}
 				<CardContent className="px-4 py-2 flex flex-col gap-2">
 					<h3 className="font-bold text-lg text-zinc-900 line-clamp-1 group-hover:text-indigo-600 transition-colors">
 						{event.title}
@@ -53,7 +50,6 @@ export default function EventCard({ event }: { event: Event }) {
 					</div>
 				</CardContent>
 
-				{/* Footer: Kategori & Tanggal */}
 				<CardFooter className="px-4 py-2 flex justify-between items-center">
 					{event.category ? (
 						<Badge
@@ -63,7 +59,7 @@ export default function EventCard({ event }: { event: Event }) {
 							{event.category.name}
 						</Badge>
 					) : (
-						<div /> /* Spacer jika tidak ada kategori */
+						<div />
 					)}
 
 					<div className="flex items-center gap-1.5 text-xs font-medium text-zinc-400">

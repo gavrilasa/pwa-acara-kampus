@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Grid, Heart, Info, Sparkles } from "lucide-react";
-
+import { Home, Grid, Heart, Info, Command } from "lucide-react";
 import {
 	Sidebar,
 	SidebarContent,
@@ -29,8 +28,6 @@ export default function AppSidebar() {
 	];
 
 	return (
-		// collapsible="icon" memungkinkan sidebar menyusut jadi ikon saja
-		// hidden md:flex memastikan sidebar BENAR-BENAR HILANG di mobile agar tidak bentrok dengan MobileDock
 		<Sidebar collapsible="icon" className="hidden md:flex border-r-zinc-200">
 			<SidebarHeader>
 				<SidebarMenu>
@@ -38,13 +35,15 @@ export default function AppSidebar() {
 						<SidebarMenuButton size="lg" asChild>
 							<Link href="/">
 								<div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-indigo-600 text-white">
-									<Sparkles className="size-4" />
+									<Command className="size-4" />
 								</div>
 								<div className="flex flex-col gap-0.5 leading-none">
 									<span className="font-semibold text-zinc-900">
-										KampusEvent
+										Acara Kampus
 									</span>
-									<span className="text-zinc-500">v2.0</span>
+									<span className="text-zinc-500 text-xs">
+										Universitas Diponegoro
+									</span>
 								</div>
 							</Link>
 						</SidebarMenuButton>
@@ -61,7 +60,7 @@ export default function AppSidebar() {
 								<SidebarMenuItem key={item.label}>
 									<SidebarMenuButton
 										asChild
-										tooltip={item.label} // Tooltip muncul otomatis saat collapsed
+										tooltip={item.label}
 										isActive={pathname === item.href}
 										className="hover:bg-zinc-100 data-[active=true]:bg-indigo-50 data-[active=true]:text-indigo-700"
 									>
@@ -78,13 +77,11 @@ export default function AppSidebar() {
 			</SidebarContent>
 
 			<SidebarFooter>
-				{/* Footer content yang akan hilang saat collapsed */}
 				<div className="p-2 text-xs text-zinc-400 text-center opacity-100 group-data-[collapsible=icon]:opacity-0 transition-opacity">
-					© 2025 KampusEvent
+					© 2025 AcaraKampusPWA
 				</div>
 			</SidebarFooter>
 
-			{/* Rail memungkinkan user click/drag border untuk resize/collapse sidebar */}
 			<SidebarRail />
 		</Sidebar>
 	);

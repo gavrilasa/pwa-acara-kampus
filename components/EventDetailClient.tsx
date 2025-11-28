@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, Calendar, MapPin, User, Clock, Share2 } from "lucide-react";
 import { motion } from "framer-motion";
-
 import { Event } from "@/types";
 import FavoriteButton from "@/components/FavoriteButton";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
 export default function EventDetailClient({ event }: { event: Event }) {
-	// Format tanggal
 	const dateObj = new Date(event.date);
 	const dateString = dateObj.toLocaleDateString("id-ID", {
 		weekday: "long",
@@ -27,9 +25,7 @@ export default function EventDetailClient({ event }: { event: Event }) {
 
 	return (
 		<div className="min-h-screen bg-white pb-24">
-			{/* --- Hero Section (Full Width Image) --- */}
 			<div className="relative h-[40vh] min-h-[300px] w-full md:h-[50vh]">
-				{/* Navigation Overlay */}
 				<div className="absolute left-0 top-0 z-20 flex w-full justify-between p-4 md:px-8 md:py-6">
 					<Link href="/">
 						<Button
@@ -42,7 +38,6 @@ export default function EventDetailClient({ event }: { event: Event }) {
 					</Link>
 
 					<div className="flex gap-2">
-						{/* Share Button (Placeholder) */}
 						<Button
 							variant="secondary"
 							size="icon"
@@ -50,14 +45,12 @@ export default function EventDetailClient({ event }: { event: Event }) {
 						>
 							<Share2 size={20} />
 						</Button>
-						{/* Favorite Button */}
 						<div className="pointer-events-auto">
 							<FavoriteButton event={event} />
 						</div>
 					</div>
 				</div>
 
-				{/* Image */}
 				{event.imageUrl ? (
 					<motion.div
 						initial={{ opacity: 0 }}
@@ -72,7 +65,6 @@ export default function EventDetailClient({ event }: { event: Event }) {
 							className="object-cover"
 							priority
 						/>
-						{/* Subtle gradient at bottom to blend if needed */}
 						<div className="absolute bottom-0 left-0 right-0 h-24 bg-linear-to-t from-white/10 to-transparent md:hidden" />
 					</motion.div>
 				) : (
@@ -82,17 +74,14 @@ export default function EventDetailClient({ event }: { event: Event }) {
 				)}
 			</div>
 
-			{/* --- Main Content Layout --- */}
 			<div className="container mx-auto px-4 md:px-6 lg:max-w-6xl">
 				<div className="relative -mt-8 md:-mt-0 md:pt-10 grid gap-10 lg:grid-cols-[2fr_1fr]">
-					{/* LEFT COLUMN: Header & Description */}
 					<motion.div
 						initial={{ y: 20, opacity: 0 }}
 						animate={{ y: 0, opacity: 1 }}
 						transition={{ delay: 0.2, duration: 0.5 }}
 						className="space-y-8"
 					>
-						{/* Header Title Block (Mobile Card-like overlap / Desktop Clean) */}
 						<div className="rounded-2xl bg-white p-6 shadow-xl shadow-zinc-200/20 md:p-0 md:shadow-none">
 							<div className="flex flex-wrap gap-2 mb-4">
 								{event.category && (
@@ -114,7 +103,6 @@ export default function EventDetailClient({ event }: { event: Event }) {
 								{event.title}
 							</h1>
 
-							{/* Organizer Mini Profile */}
 							{event.organizer && (
 								<div className="flex items-center gap-3 pt-2">
 									<div className="h-10 w-10 rounded-full bg-zinc-100 flex items-center justify-center border border-zinc-200">
@@ -134,7 +122,6 @@ export default function EventDetailClient({ event }: { event: Event }) {
 
 						<Separator className="hidden md:block" />
 
-						{/* Description Section */}
 						<div className="space-y-4">
 							<h3 className="text-xl font-bold text-zinc-900">Tentang Acara</h3>
 							<div className="prose prose-zinc prose-lg max-w-none text-zinc-600 leading-relaxed whitespace-pre-line">
@@ -143,7 +130,6 @@ export default function EventDetailClient({ event }: { event: Event }) {
 						</div>
 					</motion.div>
 
-					{/* RIGHT COLUMN: Sticky Sidebar Info */}
 					<motion.div
 						initial={{ y: 20, opacity: 0 }}
 						animate={{ y: 0, opacity: 1 }}
@@ -151,10 +137,8 @@ export default function EventDetailClient({ event }: { event: Event }) {
 						className="lg:block"
 					>
 						<div className="sticky top-24 space-y-6">
-							{/* Unified Details Card */}
 							<div className="rounded-2xl border border-zinc-100 bg-white p-6 shadow-xl shadow-zinc-200/30">
 								<div className="space-y-6">
-									{/* Date */}
 									<div className="flex gap-4 items-start">
 										<div className="rounded-lg bg-indigo-50 p-2.5 text-indigo-600 shrink-0">
 											<Calendar size={22} />
@@ -172,7 +156,6 @@ export default function EventDetailClient({ event }: { event: Event }) {
 										</div>
 									</div>
 
-									{/* Location */}
 									<div className="flex gap-4 items-start">
 										<div className="rounded-lg bg-indigo-50 p-2.5 text-indigo-600 shrink-0">
 											<MapPin size={22} />
@@ -186,19 +169,6 @@ export default function EventDetailClient({ event }: { event: Event }) {
 										</div>
 									</div>
 								</div>
-
-								<Separator className="my-6" />
-
-								{/* Maps / Action Placeholder */}
-								<div className="rounded-xl bg-zinc-100 h-32 w-full flex items-center justify-center text-zinc-400 text-xs mb-4">
-									<span className="flex items-center gap-2">
-										<MapPin size={16} /> Peta Lokasi
-									</span>
-								</div>
-
-								<Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold h-11 rounded-xl shadow-lg shadow-indigo-200 transition-all hover:-translate-y-0.5">
-									Daftar Sekarang
-								</Button>
 							</div>
 						</div>
 					</motion.div>
