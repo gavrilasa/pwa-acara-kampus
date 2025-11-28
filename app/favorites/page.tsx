@@ -74,22 +74,26 @@ export default function FavoritesPage() {
 
 	return (
 		<div className="pb-24 min-h-screen bg-gray-50">
-			<div className="bg-white/80 backdrop-blur-md px-6 py-4 border-b border-gray-200 sticky top-0 z-30 flex justify-between items-center transition-all">
-				<h1 className="text-xl font-bold text-gray-900 tracking-tight">
-					Favorit Saya
-				</h1>
+			{/* HEADER: Diperbaiki agar background full-width, tapi konten mengikuti container */}
+			<div className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-30 transition-all">
+				<div className="container mx-auto px-4 py-4 md:px-6 flex justify-between items-center">
+					<h1 className="text-xl font-bold text-gray-900 tracking-tight">
+						Favorit Saya
+					</h1>
 
-				<div
-					className={`flex items-center gap-2 text-xs font-medium text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full transition-opacity duration-500 ${
-						isSyncing ? "opacity-100" : "opacity-0"
-					}`}
-				>
-					<RefreshCw size={12} className="animate-spin" />
-					<span>Memperbarui...</span>
+					<div
+						className={`flex items-center gap-2 text-xs font-medium text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full transition-opacity duration-500 ${
+							isSyncing ? "opacity-100" : "opacity-0"
+						}`}
+					>
+						<RefreshCw size={12} className="animate-spin" />
+						<span>Memperbarui...</span>
+					</div>
 				</div>
 			</div>
 
-			<div className="p-4 md:p-6 max-w-7xl mx-auto">
+			{/* KONTEN: Padding disesuaikan (px-4 md:px-6) agar lurus dengan header */}
+			<div className="container mx-auto px-4 py-6 md:px-6">
 				{favorites.length > 0 ? (
 					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
 						{favorites.map((fav) => (

@@ -6,7 +6,7 @@ info:
 servers:
   - url: http://localhost:3000
     description: Local Server
-  - url: https://pwa-acara-kampus.vercel.app
+  - url: https://acara-kampus-pwa.vercel.app
     description: Production Server
 
 components:

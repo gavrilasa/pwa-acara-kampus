@@ -1,4 +1,5 @@
 import { Github, Instagram } from "lucide-react";
+import Image from "next/image";
 
 export default function AboutPage() {
 	return (
@@ -7,7 +8,12 @@ export default function AboutPage() {
 				<div className="absolute -bottom-16 left-1/2 -translate-x-1/2">
 					<div className="w-32 h-32 rounded-full border-4 border-white overflow-hidden bg-gray-200 relative">
 						<div className="w-full h-full bg-gray-300 flex items-center justify-center text-gray-500">
-							Foto
+							<Image
+								src={"/profilepicture-AI.webp"}
+								fill
+								alt="Photo Profile"
+								className="object-cover object-center"
+							/>
 						</div>
 					</div>
 				</div>
@@ -50,7 +56,7 @@ export default function AboutPage() {
 				</div>
 
 				<footer className="mt-12 text-xs text-gray-400">
-					&copy; 2025 AcaraKampus PWA. v1.0.0
+					&copy; 2025 AcaraKampusPWA
 				</footer>
 			</div>
 		</div>
