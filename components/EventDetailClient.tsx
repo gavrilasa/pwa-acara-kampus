@@ -1,16 +1,25 @@
 "use client";
 
+import { useState } from "react"; // Tambahkan useState
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, Calendar, MapPin, User, Clock, Share2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Event } from "@/types";
 import FavoriteButton from "@/components/FavoriteButton";
+import EditEventDialog from "@/components/EditEventDialog"; // Import komponen baru
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
-export default function EventDetailClient({ event }: { event: Event }) {
+export default function EventDetailClient({
+	event: initialEvent,
+}: {
+	event: Event;
+}) {
+	// Ubah prop event menjadi state agar bisa diupdate
+	const [event, setEvent] = useState<Event>(initialEvent);
+
 	const dateObj = new Date(event.date);
 	const dateString = dateObj.toLocaleDateString("id-ID", {
 		weekday: "long",
@@ -22,6 +31,14 @@ export default function EventDetailClient({ event }: { event: Event }) {
 		hour: "2-digit",
 		minute: "2-digit",
 	});
+
+	// Handler saat update berhasil
+	const handleEventUpdate = (updatedEvent: Event) => {
+		setEvent(updatedEvent);
+		// Update cache lokal juga agar konsisten saat offline/refresh
+		const CACHE_KEY = `event_detail_${updatedEvent.id}`;
+		localStorage.setItem(CACHE_KEY, JSON.stringify(updatedEvent));
+	};
 
 	return (
 		<div className="min-h-screen bg-white pb-24">
@@ -38,6 +55,9 @@ export default function EventDetailClient({ event }: { event: Event }) {
 					</Link>
 
 					<div className="flex gap-2">
+						{/* Tombol Edit Baru */}
+						<EditEventDialog event={event} onUpdate={handleEventUpdate} />
+
 						<Button
 							variant="secondary"
 							size="icon"
@@ -51,6 +71,7 @@ export default function EventDetailClient({ event }: { event: Event }) {
 					</div>
 				</div>
 
+				{/* Sisa kode di bawah tetap sama, hanya variabel 'event' sekarang mengacu pada state */}
 				{event.imageUrl ? (
 					<motion.div
 						initial={{ opacity: 0 }}
@@ -75,7 +96,7 @@ export default function EventDetailClient({ event }: { event: Event }) {
 			</div>
 
 			<div className="container mx-auto px-4 md:px-6 lg:max-w-6xl">
-				<div className="relative -mt-8 md:-mt-0 md:pt-10 grid gap-10 lg:grid-cols-[2fr_1fr]">
+				<div className="relative -mt-8 md:mt-0 md:pt-10 grid gap-10 lg:grid-cols-[2fr_1fr]">
 					<motion.div
 						initial={{ y: 20, opacity: 0 }}
 						animate={{ y: 0, opacity: 1 }}
